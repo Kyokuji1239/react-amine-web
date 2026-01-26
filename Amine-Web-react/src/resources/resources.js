@@ -1,9 +1,8 @@
 let _handlers = {}
 
-export function initCommunityBoard() {
+export function initPage() {
   const sidebar = document.getElementById('sidebar')
   const trigger = document.querySelector('.menu-trigger')
-  const homeBtn = document.querySelector('.home-button')
   const mainCard = document.querySelector('.main-card')
 
   function toggleSidebar() {
@@ -12,17 +11,9 @@ export function initCommunityBoard() {
     if (sidebar.classList.contains('active')) {
       trigger.style.transform = 'rotate(90deg)'
       trigger.style.left = '280px'
-      if (homeBtn) {
-        homeBtn.style.left = '280px'
-        // ensure home button does not rotate
-        homeBtn.style.transform = 'none'
-      }
     } else {
       trigger.style.transform = 'rotate(0deg)'
       trigger.style.left = '25px'
-      if (homeBtn) {
-        homeBtn.style.left = '25px'
-      }
     }
   }
 
@@ -41,21 +32,7 @@ export function initCommunityBoard() {
   if (mainCard) mainCard.addEventListener('click', mainClickHandler)
 }
 
-export function closeSidebar() {
-  const sidebar = document.getElementById('sidebar')
-  const trigger = document.querySelector('.menu-trigger')
-  if (sidebar && sidebar.classList.contains('active')) {
-    sidebar.classList.remove('active')
-    if (trigger) {
-      trigger.style.transform = 'rotate(0deg)'
-      trigger.style.left = '25px'
-      const homeBtn = document.querySelector('.home-button')
-      if (homeBtn) homeBtn.style.left = '25px'
-    }
-  }
-}
-
-export function teardownCommunityBoard() {
+export function teardownPage() {
   const sidebar = document.getElementById('sidebar')
   const trigger = document.querySelector('.menu-trigger')
   const mainCard = document.querySelector('.main-card')
@@ -68,11 +45,6 @@ export function teardownCommunityBoard() {
     trigger.style.left = ''
   }
   if (sidebar) sidebar.classList.remove('active')
-  const homeBtn = document.querySelector('.home-button')
-  if (homeBtn) {
-    homeBtn.style.left = ''
-    homeBtn.style.transform = ''
-  }
 }
 
-export default { initCommunityBoard, teardownCommunityBoard }
+export default { initPage, teardownPage }

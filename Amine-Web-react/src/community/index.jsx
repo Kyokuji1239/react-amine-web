@@ -1,8 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './index.css'
-import { initCommunityBoard, teardownCommunityBoard } from './index.js'
+import { initCommunityBoard, teardownCommunityBoard, closeSidebar } from './index.js'
+import { Content as AboutContent } from '../about/about.jsx'
+import { Content as ActivitiesContent } from '../activities/activities.jsx'
+import { Content as AmineContent } from '../amine/amine.jsx'
+import { Content as DerivativeWorksContent } from '../derivativeworks/derivativeworks.jsx'
+import { Content as ForumContent } from '../forum/forum.jsx'
+import { Content as ResourcesContent } from '../resources/resources.jsx'
+import { Content as TechContent } from '../tech/tech.jsx'
 
 export default function CommunityBoard() {
+  const [page, setPage] = useState('home')
   useEffect(() => {
     initCommunityBoard()
     return () => teardownCommunityBoard()
@@ -17,6 +25,7 @@ export default function CommunityBoard() {
           <div></div>
         </div>
       </div>
+      <div className="home-button" onClick={(e)=>{e.preventDefault(); setPage('home'); closeSidebar()}} title="返回主页">🏠</div>
 
       <nav className="sidebar" id="sidebar">
         <div style={{ padding: '0 30px 30px', textAlign: 'center' }}>
@@ -24,21 +33,20 @@ export default function CommunityBoard() {
           <h3 style={{ color: 'var(--text-main)' }}>User_Name</h3>
           <p style={{ fontSize: 12, color: 'var(--text-sub)' }}>Lv.5 高级会员</p>
         </div>
-
-        <a href="#" className="nav-item"><span>🏫 社团介绍</span></a>
-        <a href="#" className="nav-item"><span>📺 季度新番</span></a>
-        <a href="#" className="nav-item"><span>💬 论坛闲聊</span></a>
-        <a href="#" className="nav-item"><span>🎉 社团活动</span></a>
-        <a href="#" className="nav-item"><span>🎨 同人/杂谈</span></a>
-        <a href="#" className="nav-item"><span>💻 前沿技术</span></a>
-        <a href="#" className="nav-item"><span>💾 网络资源</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('about'); closeSidebar()}}><span>🏫 社团介绍</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('amine'); closeSidebar()}}><span>📺 季度新番</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('forum'); closeSidebar()}}><span>💬 论坛闲聊</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('activities'); closeSidebar()}}><span>🎉 社团活动</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('derivativeworks'); closeSidebar()}}><span>🎨 同人/杂谈</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('tech'); closeSidebar()}}><span>💻 前沿技术</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('resources'); closeSidebar()}}><span>💾 网络资源</span></a>
       </nav>
 
       <main className="main-card">
         <header className="card-header">
-          <div className="logo-area">
-            <h1>动漫社 · 基地</h1>
-          </div>
+            <div className="logo-area">
+              <h1>动漫社 · 基地</h1>
+            </div>
           <div className="search-bar">
             <span>🔍</span>
             <input type="text" placeholder="搜索帖子、番剧..." />
@@ -46,61 +54,73 @@ export default function CommunityBoard() {
         </header>
 
         <section className="card-content">
-          <div className="welcome-banner">
-            <h2>👋 下午好！今天想看点什么？</h2>
-            <p>本周社团活动定于周六，不要忘记报名哦~</p>
-          </div>
-
-          <div style={{ marginBottom: 20, fontWeight: 'bold', color: 'var(--text-main)', fontSize: 18 }}>
-            ✨ 最新动态
-          </div>
-
-          <div className="grid-container">
-            <article className="post-card">
-              <span className="card-badge tag-anime">季度新番</span>
-              <h3>四月新番扫雷指南，这几部必追！</h3>
-              <p>看了第一集，京阿尼这次的作画依然稳定，另外那部异世界转生...</p>
-              <div className="post-meta">
-                <div className="avatar-mini"></div> <span>番剧组长 · 2小时前</span>
+          {page === 'home' && (
+            <>
+              <div className="welcome-banner">
+                <h2>👋 下午好！今天想看点什么？</h2>
+                <p>本周社团活动定于周六，不要忘记报名哦~</p>
               </div>
-            </article>
 
-            <article className="post-card">
-              <span className="card-badge tag-event">社团活动</span>
-              <h3>【重要】本周六晚线下聚会 & 抽奖</h3>
-              <p>地点：学生活动中心302。记得带上你的 Switch，我们准备了大乱斗比赛。</p>
-              <div className="post-meta">
-                <div className="avatar-mini"></div> <span>社长 · 置顶</span>
+              <div style={{ marginBottom: 20, fontWeight: 'bold', color: 'var(--text-main)', fontSize: 18 }}>
+                ✨ 最新动态
               </div>
-            </article>
 
-            <article className="post-card">
-              <span className="card-badge tag-tech">前沿技术</span>
-              <h3>搭建了一个社团专属的 NAS，教程分享</h3>
-              <p>以后大家的番剧资源可以直接从内网满速下载了，附详细配置...</p>
-              <div className="post-meta">
-                <div className="avatar-mini"></div> <span>技术宅 · 5小时前</span>
-              </div>
-            </article>
+              <div className="grid-container">
+                <article className="post-card">
+                  <span className="card-badge tag-anime">季度新番</span>
+                  <h3>四月新番扫雷指南，这几部必追！</h3>
+                  <p>看了第一集，京阿尼这次的作画依然稳定，另外那部异世界转生...</p>
+                  <div className="post-meta">
+                    <div className="avatar-mini"></div> <span>番剧组长 · 2小时前</span>
+                  </div>
+                </article>
 
-            <article className="post-card">
-              <span className="card-badge tag-chat">论坛闲聊</span>
-              <h3>有没有人出下周漫展的票？</h3>
-              <p>错过早鸟票了，收两张，价格好商量，最好是面交。</p>
-              <div className="post-meta">
-                <div className="avatar-mini"></div> <span>路人A · 1天前</span>
-              </div>
-            </article>
+                <article className="post-card">
+                  <span className="card-badge tag-event">社团活动</span>
+                  <h3>【重要】本周六晚线下聚会 & 抽奖</h3>
+                  <p>地点：学生活动中心302。记得带上你的 Switch，我们准备了大乱斗比赛。</p>
+                  <div className="post-meta">
+                    <div className="avatar-mini"></div> <span>社长 · 置顶</span>
+                  </div>
+                </article>
 
-            <article className="post-card">
-              <span className="card-badge tag-anime">同人/杂谈</span>
-              <h3>[多图] 昨天的Cosplay返图，修好了</h3>
-              <p>这套片子拍得太有感觉了，光影绝了，大家自取。</p>
-              <div className="post-meta">
-                <div className="avatar-mini"></div> <span>摄影菌 · 3小时前</span>
+                <article className="post-card">
+                  <span className="card-badge tag-tech">前沿技术</span>
+                  <h3>搭建了一个社团专属的 NAS，教程分享</h3>
+                  <p>以后大家的番剧资源可以直接从内网满速下载了，附详细配置...</p>
+                  <div className="post-meta">
+                    <div className="avatar-mini"></div> <span>技术宅 · 5小时前</span>
+                  </div>
+                </article>
+
+                <article className="post-card">
+                  <span className="card-badge tag-chat">论坛闲聊</span>
+                  <h3>有没有人出下周漫展的票？</h3>
+                  <p>错过早鸟票了，收两张，价格好商量，最好是面交。</p>
+                  <div className="post-meta">
+                    <div className="avatar-mini"></div> <span>路人A · 1天前</span>
+                  </div>
+                </article>
+
+                <article className="post-card">
+                  <span className="card-badge tag-anime">同人/杂谈</span>
+                  <h3>[多图] 昨天的Cosplay返图，修好了</h3>
+                  <p>这套片子拍得太有感觉了，光影绝了，大家自取。</p>
+                  <div className="post-meta">
+                    <div className="avatar-mini"></div> <span>摄影菌 · 3小时前</span>
+                  </div>
+                </article>
               </div>
-            </article>
-          </div>
+            </>
+          )}
+
+          {page === 'about' && <AboutContent />}
+          {page === 'activities' && <ActivitiesContent />}
+          {page === 'amine' && <AmineContent />}
+          {page === 'derivativeworks' && <DerivativeWorksContent />}
+          {page === 'forum' && <ForumContent />}
+          {page === 'resources' && <ResourcesContent />}
+          {page === 'tech' && <TechContent />}
         </section>
       </main>
     </div>
