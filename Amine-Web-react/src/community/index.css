@@ -91,17 +91,6 @@
 .community-root .card-header { padding: 25px 40px; background: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
 .community-root .logo-area h1 { font-family: 'ZCOOL KuaiLe', cursive; color: var(--primary-color); font-size: 28px; letter-spacing: 1px; }
 
-/* 页面内标题行的本地菜单 */
-.community-root .page-menu { display: inline-flex; align-items: center; position: relative; margin-right: 12px; }
-.community-root .page-trigger, .community-root .page-home { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; margin-right: 8px; cursor: pointer; background: transparent; color: var(--primary-color); transition: background 0.2s ease, transform 0.2s ease; }
-.community-root .page-trigger:hover, .community-root .page-home:hover { background: rgba(255,255,255,0.7); transform: translateY(-2px); }
-.community-root .page-panel { position: absolute; left: 0; top: 46px; background: #fff; padding: 10px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 200px; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: all 0.22s ease; display: flex; flex-direction: column; gap: 6px; }
-.community-root .page-panel.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.community-root .page-panel a { padding: 8px 10px; text-decoration: none; color: var(--text-main); border-radius: 8px; font-weight: 500; }
-.community-root .page-panel a:hover { background: #FFF0F3; color: var(--primary-color); }
-.community-root .search-bar { background: #f5f5f5; padding: 8px 20px; border-radius: 20px; display: flex; align-items: center; width: 300px; }
-.community-root .search-bar input { border: none; background: transparent; width: 100%; margin-left: 10px; color: var(--text-main); }
-
 .community-root .card-content { flex: 1; padding: 30px 40px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary-color) #f0f0f0; }
 .community-root .card-content::-webkit-scrollbar { width: 8px; }
 .community-root .card-content::-webkit-scrollbar-thumb { background: #FFC2D1; border-radius: 10px; }

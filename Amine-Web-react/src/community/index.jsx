@@ -11,7 +11,6 @@ import { Content as TechContent } from '../tech/tech.jsx'
 
 export default function CommunityBoard() {
   const [page, setPage] = useState('home')
-  const [pageMenuOpen, setPageMenuOpen] = useState(false)
   useEffect(() => {
     initCommunityBoard()
     return () => teardownCommunityBoard()
@@ -46,19 +45,6 @@ export default function CommunityBoard() {
       <main className="main-card">
         <header className="card-header">
             <div className="logo-area">
-              <div className="page-menu">
-                <div className="page-trigger" onClick={() => setPageMenuOpen(v => !v)} aria-label="页面菜单">☰</div>
-                <div className="page-home" onClick={(e)=>{e.preventDefault(); setPage('home'); setPageMenuOpen(false)}} title="返回主页">🏠</div>
-                <div className={`page-panel ${pageMenuOpen ? 'open' : ''}`}>
-                  <a href="#" onClick={(e)=>{e.preventDefault(); setPage('about'); setPageMenuOpen(false)}}>🏫 社团介绍</a>
-                  <a href="#" onClick={(e)=>{e.preventDefault(); setPage('amine'); setPageMenuOpen(false)}}>📺 季度新番</a>
-                  <a href="#" onClick={(e)=>{e.preventDefault(); setPage('forum'); setPageMenuOpen(false)}}>💬 论坛闲聊</a>
-                  <a href="#" onClick={(e)=>{e.preventDefault(); setPage('activities'); setPageMenuOpen(false)}}>🎉 社团活动</a>
-                  <a href="#" onClick={(e)=>{e.preventDefault(); setPage('derivativeworks'); setPageMenuOpen(false)}}>🎨 同人/杂谈</a>
-                  <a href="#" onClick={(e)=>{e.preventDefault(); setPage('tech'); setPageMenuOpen(false)}}>💻 前沿技术</a>
-                  <a href="#" onClick={(e)=>{e.preventDefault(); setPage('resources'); setPageMenuOpen(false)}}>💾 网络资源</a>
-                </div>
-              </div>
               <h1>动漫社 · 基地</h1>
             </div>
           <div className="search-bar">
