@@ -1,0 +1,249 @@
+.postDetail {
+  max-width: 100%;
+  margin: 0;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 133, 161, 0.2);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 2rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.backButton:hover {
+  background: var(--primary-color);
+  transform: translateX(-5px);
+}
+
+.postHeader {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid rgba(255, 133, 161, 0.3);
+}
+
+.postMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  color: var(--text-sub);
+  font-size: 0.95rem;
+}
+
+.category {
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.date, .author, .readTime {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.postTitle {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  color: var(--text-main);
+  font-size: 2.2rem;
+  margin: 1rem 0;
+  line-height: 1.3;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.postTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  border-radius: 2px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.tag {
+  background: rgba(255, 133, 161, 0.1);
+  color: var(--primary-color);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(255, 133, 161, 0.3);
+}
+
+.postContent {
+  line-height: 1.8;
+  color: var(--text-main);
+  font-size: 1.05rem;
+}
+
+/* Markdown 样式 */
+.markdownH1 {
+  font-family: 'ZCOOL KuaiLe', cursive;
+  color: var(--primary-color);
+  border-bottom: 3px solid var(--secondary-color);
+  padding-bottom: 0.5rem;
+  margin: 2.5rem 0 1.5rem;
+  font-size: 2rem;
+}
+
+.markdownH2 {
+  color: var(--secondary-color);
+  margin: 2rem 0 1.2rem;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.6rem;
+}
+
+.markdownH3 {
+  color: var(--primary-color);
+  margin: 1.5rem 0 1rem;
+  font-size: 1.3rem;
+}
+
+.markdownParagraph {
+  margin: 1.2rem 0;
+  text-align: justify;
+  line-height: 1.8;
+}
+
+.markdownImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1.5rem auto;
+  display: block;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.inlineCode {
+  background: rgba(255, 133, 161, 0.1);
+  color: var(--primary-color);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95em;
+}
+
+.blockquote {
+  border-left: 4px solid var(--secondary-color);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  background: rgba(76, 201, 240, 0.05);
+  color: var(--text-sub);
+  font-style: italic;
+  border-radius: 0 10px 10px 0;
+}
+
+.markdownList {
+  margin: 1.2rem 0;
+  padding-left: 2rem;
+}
+
+.markdownList li {
+  margin: 0.5rem 0;
+}
+
+.markdownLink {
+  color: var(--secondary-color);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--secondary-color);
+  transition: all 0.2s;
+}
+
+.markdownLink:hover {
+  color: var(--primary-color);
+  border-bottom-style: solid;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1.5rem;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
+.errorIcon {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.errorContainer h3 {
+  color: #ff5757;
+  margin-bottom: 1.5rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .postDetail {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+  
+  .postTitle {
+    font-size: 1.8rem;
+  }
+  
+  .postMeta {
+    font-size: 0.85rem;
+    gap: 0.8rem;
+  }
+  
+  .category {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+  }
+}
