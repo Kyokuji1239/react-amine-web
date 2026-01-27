@@ -1,3 +1,7 @@
+/*
+  社团活动发布页
+*/
+
 import { useEffect } from 'react'
 import './activities.css'
 import { initPage, teardownPage } from './activities.js'
@@ -13,15 +17,6 @@ export default function ActivitiesPage() {
       <div className="menu-trigger">
         <div className="hamburger"><div></div><div></div><div></div></div>
       </div>
-      <nav className="sidebar" id="sidebar">
-        <div style={{ padding: '0 30px 30px', textAlign: 'center' }}>
-          <h3>社团活动</h3>
-          <p style={{ fontSize: 12, color: '#888' }}>最新活动与报名入口</p>
-        </div>
-        <a href="#" className="nav-item">📅 活动列表</a>
-        <a href="#" className="nav-item">📝 报名</a>
-        <a href="#" className="nav-item">🏆 往期回顾</a>
-      </nav>
 
       <main className="main-card">
         <header className="card-header"><div className="logo-area"><h1>活动 · 动漫社</h1></div></header>

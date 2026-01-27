@@ -1,20 +1,49 @@
+/*
+  CommunityBoard组件，包含侧边导航栏和主内容区，实现了不同页面内容的切换
+  网站的核心主页功能集中在此组件中
+*/
+
 import { useEffect, useState } from 'react'
 import './index.css'
-import { initCommunityBoard, teardownCommunityBoard, closeSidebar } from './index.js'
+import { initCommunityBoard, teardownCommunityBoard, closeSidebar, usePageTitle } from './index.js'
+
+//社团介绍页面
 import { Content as AboutContent } from '../about/about.jsx'
+//社团活动页面
 import { Content as ActivitiesContent } from '../activities/activities.jsx'
+//季度新番页面
 import { Content as AmineContent } from '../amine/amine.jsx'
+//同人/杂谈页面
 import { Content as DerivativeWorksContent } from '../derivativeworks/derivativeworks.jsx'
+//论坛闲聊页面
 import { Content as ForumContent } from '../forum/forum.jsx'
+//网络资源页面
 import { Content as ResourcesContent } from '../resources/resources.jsx'
+//前沿技术页面
 import { Content as TechContent } from '../tech/tech.jsx'
 
 export default function CommunityBoard() {
   const [page, setPage] = useState('home')
+  const { setTitle } = usePageTitle();
+
   useEffect(() => {
     initCommunityBoard()
+    {/*页面的标题*/}
+    const pageTitles = {
+      'home': '动漫社基地 | 首页',
+      'about': '动漫社基地 | 社团介绍',
+      'amine': '动漫社基地 | 季度新番',
+      'forum': '动漫社基地 | 论坛闲聊',
+      'activities': '动漫社基地 | 社团活动',
+      'derivativeworks': '动漫社基地 | 同人/杂谈',
+      'tech': '动漫社基地 | 前沿技术',
+      'resources': '动漫社基地 | 网络资源'
+    };
+    if (pageTitles[page]) {
+      setTitle(pageTitles[page]);
+    }
     return () => teardownCommunityBoard()
-  }, [])
+  }, [page, setTitle])
 
   return (
     <div className="community-root">
@@ -25,14 +54,19 @@ export default function CommunityBoard() {
           <div></div>
         </div>
       </div>
+
+      {/*主要内容部分*/}
       <div className="home-button" onClick={(e)=>{e.preventDefault(); setPage('home'); closeSidebar()}} title="返回主页">🏠</div>
 
+      {/*侧边导航栏*/}
       <nav className="sidebar" id="sidebar">
+        {/*用户信息*/}
         <div style={{ padding: '0 30px 30px', textAlign: 'center' }}>
           <div style={{ width: 80, height: 80, background: 'var(--secondary-color)', borderRadius: '50%', margin: '0 auto 15px' }}></div>
           <h3 style={{ color: 'var(--text-main)' }}>User_Name</h3>
           <p style={{ fontSize: 12, color: 'var(--text-sub)' }}>Lv.5 高级会员</p>
         </div>
+        {/*导航链接*/}
         <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('about'); closeSidebar()}}><span>🏫 社团介绍</span></a>
         <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('amine'); closeSidebar()}}><span>📺 季度新番</span></a>
         <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('forum'); closeSidebar()}}><span>💬 论坛闲聊</span></a>
@@ -42,7 +76,10 @@ export default function CommunityBoard() {
         <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('resources'); closeSidebar()}}><span>💾 网络资源</span></a>
       </nav>
 
+      {/*主内容区*/}
       <main className="main-card">
+
+        {/*上边栏*/}
         <header className="card-header">
             <div className="logo-area">
               <h1>动漫社 · 基地</h1>
@@ -53,6 +90,7 @@ export default function CommunityBoard() {
           </div>
         </header>
 
+        {/*主要内容部分*/}
         <section className="card-content">
           {page === 'home' && (
             <>

@@ -1,3 +1,7 @@
+/*
+  全局样式文件，定义了基础的字体、颜色、布局和交互样式
+*/
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

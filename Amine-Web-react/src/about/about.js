@@ -33,7 +33,6 @@ export function initPage() {
 }
 
 export function teardownPage() {
-  const sidebar = document.getElementById('sidebar')
   const trigger = document.querySelector('.menu-trigger')
   const mainCard = document.querySelector('.main-card')
 
@@ -44,7 +43,6 @@ export function teardownPage() {
     trigger.style.transform = ''
     trigger.style.left = ''
   }
-  if (sidebar) sidebar.classList.remove('active')
 }
 
 export default { initPage, teardownPage }

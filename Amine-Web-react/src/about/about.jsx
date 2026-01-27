@@ -1,3 +1,7 @@
+/*
+  网站的关于界面
+  介绍动漫的信息
+*/
 import { useEffect } from 'react'
 import './about.css'
 import { initPage, teardownPage } from './about.js'
@@ -17,18 +21,6 @@ export default function AboutPage() {
           <div></div>
         </div>
       </div>
-
-      <nav className="sidebar" id="sidebar">
-        <div style={{ padding: '0 30px 30px', textAlign: 'center' }}>
-          <div style={{ width: 80, height: 80, background: '#4CC9F0', borderRadius: '50%', margin: '0 auto 15px' }}></div>
-          <h3 style={{ color: '#4A4A4A' }}>关于我们</h3>
-          <p style={{ fontSize: 12, color: '#888' }}>了解本站与社团历史</p>
-        </div>
-
-        <a href="#" className="nav-item"><span>🏫 团队</span></a>
-        <a href="#" className="nav-item"><span>📜 章程</span></a>
-        <a href="#" className="nav-item"><span>📬 联系方式</span></a>
-      </nav>
 
       <main className="main-card">
         <header className="card-header">

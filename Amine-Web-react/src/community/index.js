@@ -1,4 +1,28 @@
+import { useEffect, useRef } from 'react';
+
 let _handlers = {}
+
+export function usePageTitle(title) {
+  const originalTitle = useRef(document.title);
+  
+  useEffect(() => {
+    if (title) {
+      document.title = title;
+    }
+    
+    const currentOriginalTitle = originalTitle.current;
+    
+    return () => {
+      document.title = currentOriginalTitle;
+    };
+  }, [title]);
+  
+  const setTitle = (newTitle) => {
+    document.title = newTitle;
+  };
+  
+  return { setTitle };
+}
 
 export function initCommunityBoard() {
   const sidebar = document.getElementById('sidebar')
