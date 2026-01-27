@@ -21,6 +21,9 @@ import { Content as ForumContent } from '../forum/forum.jsx'
 import { Content as ResourcesContent } from '../resources/resources.jsx'
 //前沿技术页面
 import { Content as TechContent } from '../tech/tech.jsx'
+//音游区页面
+import { Content as MusicGamesContent } from '../musicgames/musicgames.jsx'
+
 
 export default function CommunityBoard() {
   const [page, setPage] = useState('home')
@@ -37,7 +40,8 @@ export default function CommunityBoard() {
       'activities': '动漫社基地 | 社团活动',
       'derivativeworks': '动漫社基地 | 同人/杂谈',
       'tech': '动漫社基地 | 前沿技术',
-      'resources': '动漫社基地 | 网络资源'
+      'resources': '动漫社基地 | 网络资源',
+      'musicgames': '动漫社基地 | 音游区'
     };
     if (pageTitles[page]) {
       setTitle(pageTitles[page]);
@@ -74,6 +78,7 @@ export default function CommunityBoard() {
         <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('derivativeworks'); closeSidebar()}}><span>🎨 同人/杂谈</span></a>
         <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('tech'); closeSidebar()}}><span>💻 前沿技术</span></a>
         <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('resources'); closeSidebar()}}><span>💾 网络资源</span></a>
+        <a href="#" className="nav-item" onClick={(e)=>{e.preventDefault(); setPage('musicgames'); closeSidebar()}}><span>🎵 音游区</span></a>
       </nav>
 
       {/*主内容区*/}
@@ -159,6 +164,7 @@ export default function CommunityBoard() {
           {page === 'forum' && <ForumContent />}
           {page === 'resources' && <ResourcesContent />}
           {page === 'tech' && <TechContent />}
+          {page === 'musicgames' && <MusicGamesContent />}
         </section>
       </main>
     </div>
