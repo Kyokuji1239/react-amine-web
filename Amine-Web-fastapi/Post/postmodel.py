@@ -1,6 +1,6 @@
-from sqlmodel import SQLModel,Field
+from pydantic import BaseModel,Field
 
-class Post(SQLModel, table=True):#帖子的数据库model
+class PostAnswerFromServer(BaseModel):
     id: str = Field(index=True,nullable=False,primary_key=True)
     title: str = Field(nullable=False)
     date: str = Field(nullable=False)

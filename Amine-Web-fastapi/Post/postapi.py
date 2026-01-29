@@ -1,13 +1,8 @@
-from pydantic import BaseModel
+import postmodel
 
 import app
+from Db.Posts import crud
 
-class PostRequestFromClient(BaseModel):
-    id: int
-
-class PostAnswerFromServer(BaseModel):
-    text: str
-
-@app.app.get("/")
-def readPost(request: PostRequestFromClient):
-    pass
+@app.app.get("/posts/{post_name}")
+def getPost(post_name: str) -> postmodel.PostAnswerFromServer:
+    return crud.readPost(post_name)
