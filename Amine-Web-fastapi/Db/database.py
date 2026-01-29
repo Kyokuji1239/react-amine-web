@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, create_engine, Session
-import Posts.post
+import Db.Posts.post
 
 DATABASE_URL = "postgresql://postgres:12345678@localhost/postgres"#postgresql://username:password@localhost/dbname
 engine = create_engine(DATABASE_URL, echo=True)

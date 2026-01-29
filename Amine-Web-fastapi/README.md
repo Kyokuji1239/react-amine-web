@@ -2,6 +2,7 @@
 - fastapi[all]
 - sqlmodel
 - asyncpg
+- psycopg2
 
 # 配置
 进入main.py
