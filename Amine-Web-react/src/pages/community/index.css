@@ -23,16 +23,29 @@
 /* 主容器 - 关键：自然文档流，可以滚动 */
 .community-root {
   font-family: 'Quicksand', 'Noto Sans SC', sans-serif;
-  background: #f0f2f5 url('../../../BackGround.png') center / cover fixed;
+  background: #f0f2f5;
   min-height: 100vh;
   min-width: 320px;
   color: var(--text-main);
   position: relative;
+  z-index: 0;
+  isolation: isolate;
   contain: layout style paint;
   /* 自然文档流，可以滚动 */
   display: block;
   /* 为卡片预留足够空间 */
   padding: 40px 20px 100px;
+}
+
+/* 固定背景层，视觉接近原来 fixed 效果，但避免在主容器上反复重绘 */
+.community-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #f0f2f5 url('../../../BackGround.png') center / cover no-repeat;
+  background-attachment: fixed;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* 固定定位元素 */
@@ -151,7 +164,6 @@
   box-shadow: var(--shadow-soft);
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(8px);
   contain: layout style paint;
   /* 居中但不限制高度 */
   margin: 0 auto;
@@ -175,7 +187,6 @@
   border-top-right-radius: var(--radius-large);
   /* 相对定位，不固定 */
   position: relative;
-  backdrop-filter: blur(5px);
 }
 
 .community-root .logo-area {
@@ -358,8 +369,6 @@
   padding: 2rem;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   min-height: 400px;
   contain: layout style paint;
   grid-row: 1 / span 3;
@@ -380,8 +389,6 @@
   padding: 2rem;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   contain: layout style;
 }
 
