@@ -9,7 +9,9 @@ import './index.css'
 import { initCommunityBoard, teardownCommunityBoard, closeSidebar, usePageTitle } from './index.js'
 import PostList from '../components/PostList'
 import PostDetail from '../components/PostDetail'
-import { Routes, Route, Link, useNavigate, useLocation} from 'react-router-dom'
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
+//用户面板组件
+import UserPanel from '../components/UserPanel'
 import PostEditor from '../components/PostEditor';
 
 //社团介绍页面
@@ -47,11 +49,11 @@ export default function CommunityBoard() {
       '/resources': '动漫社基地 | 网络资源',
       '/musicgames': '动漫社基地 | 音游区'
     };
-    
+
     if (pageTitles[location.pathname]) {
       setTitle(pageTitles[location.pathname]);
     } else if (location.pathname.startsWith('/post/')) {
-       setTitle('动漫社基地 | 帖子详情');
+      setTitle('动漫社基地 | 帖子详情');
     }
   }, [location, setTitle]);
 
@@ -63,8 +65,8 @@ export default function CommunityBoard() {
 
   // 处理阅读全文点击
   const handleReadMore = (postId) => {
-    navigate(`/post/${postId}`, { 
-      state: { from: location.pathname } 
+    navigate(`/post/${postId}`, {
+      state: { from: location.pathname }
     });
     closeSidebar();
   };
@@ -89,13 +91,13 @@ export default function CommunityBoard() {
 
       {/*主要内容部分*/}
       <Link to="/" className="home-button" onClick={closeSidebar}>
-      🏠
+        🏠
       </Link>
 
       {/*侧边导航栏*/}
       <nav className="sidebar" id="sidebar">
         {/*用户信息*/}
-        {/*以后再写*/}
+        <UserPanel />
         {/*导航链接*/}
         <Link to="/about" className="nav-item" onClick={closeSidebar}><span>🏫 社团介绍</span></Link>
         <Link to="/amine" className="nav-item" onClick={closeSidebar}><span>📺 季度新番</span></Link>
@@ -112,9 +114,9 @@ export default function CommunityBoard() {
 
         {/*上边栏*/}
         <header className="card-header">
-            <div className="logo-area">
-              <h1>动漫社 · 基地</h1>
-            </div>
+          <div className="logo-area">
+            <h1>动漫社 · 基地</h1>
+          </div>
           <div className="search-bar">
             <span>🔍</span>
             <input type="text" placeholder="搜索帖子、番剧..." />
@@ -136,7 +138,7 @@ export default function CommunityBoard() {
                 <PostList onReadMore={handleReadMore} />
               </>
             } />
-            
+
             {/* 各个子页面 */}
             <Route path="/about" element={<AboutContent />} />
             <Route path="/amine" element={<AmineContent />} />

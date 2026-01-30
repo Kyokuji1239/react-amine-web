@@ -1,0 +1,45 @@
+.container {
+    padding: 16px 30px;
+    /* 与 .nav-item 一致 */
+    margin: 5px 15px;
+    /* 与 .nav-item 一致 */
+    border-bottom: 1px solid #eee;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f8b, #9cf);
+    background-size: cover;
+    background-position: center;
+}
+
+.info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.action {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+}
+
+.nameBtn {
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+}
