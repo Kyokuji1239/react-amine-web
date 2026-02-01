@@ -1,18 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkIns from 'remark-ins';
+import rehypeHighlight from 'rehype-highlight';
+import MarkdownEditor from 'react-markdown-editor-lite';
+import 'react-markdown-editor-lite/lib/index.css';
 import styles from './PostDetail.module.css';
 import { loadPostContent } from '../../utils/postLoader';
 import { getCategoryColor } from '../../config';
+import { useUser } from '../../context/UserContext';
 
 const PostDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useUser();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isReplyOpen, setIsReplyOpen] = useState(false);
+  const [replyDraft, setReplyDraft] = useState('');
+  const [replies, setReplies] = useState([]);
+  const [activeReplyId, setActiveReplyId] = useState(null);
+  const [nestedDraft, setNestedDraft] = useState('');
+
+  const currentUser = {
+    id: user?.id || 'guest',
+    name: user?.profile?.name || '游客',
+    avatar: user?.profile?.avatar || '',
+  };
+
+  const createId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   const getBackPath = () => {
     if (location.state?.from) return location.state.from;
@@ -49,6 +69,76 @@ const PostDetail = () => {
     fetchPost();
   }, [id]);
 
+  const handleSubmitReply = () => {
+    if (!replyDraft.trim()) return;
+    const newReply = {
+      id: createId(),
+      author: currentUser,
+      content: replyDraft.trim(),
+      createdAt: new Date().toISOString(),
+      parentId: null,
+      replyToName: null,
+    };
+    setReplies((prev) => [...prev, newReply]);
+    setReplyDraft('');
+    setIsReplyOpen(false);
+  };
+
+  const handleOpenNestedReply = (replyId) => {
+    setActiveReplyId(replyId);
+    setNestedDraft('');
+  };
+
+  const handleSubmitNestedReply = (replyId) => {
+    if (!nestedDraft.trim()) return;
+    const target = replies.find((item) => item.id === replyId);
+    const newReply = {
+      id: createId(),
+      author: currentUser,
+      content: nestedDraft.trim(),
+      createdAt: new Date().toISOString(),
+      parentId: replyId,
+      replyToName: target?.author?.name || '用户',
+    };
+    setReplies((prev) => [...prev, newReply]);
+    setNestedDraft('');
+    setActiveReplyId(null);
+  };
+
+  const handleDeletePost = () => {
+    if (!window.confirm('确定删除该帖子吗？此操作不可恢复。')) return;
+    setPost(null);
+    navigate(getBackPath());
+  };
+
+  const handleDeleteReply = (replyId) => {
+    if (!window.confirm('确定删除该回复吗？')) return;
+    setReplies((prev) => prev.filter((reply) => reply.id !== replyId && reply.parentId !== replyId));
+    if (activeReplyId === replyId) {
+      setActiveReplyId(null);
+    }
+  };
+
+  const replyEditorConfig = {
+    view: {
+      menu: true,
+      md: true,
+      html: true,
+    },
+    canView: {
+      menu: true,
+      md: true,
+      html: true,
+      fullScreen: false,
+      hideMenu: true,
+    },
+    htmlClass: 'markdown-body markdown-preview markdown-reply',
+    markdownClass: 'markdown-editor',
+    syncScrollMode: ['leftFollowRight', 'rightFollowLeft'],
+    imageAccept: '.jpg,.jpeg,.png,.gif,.webp',
+    linkAccept: '.*',
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -72,8 +162,48 @@ const PostDetail = () => {
 
   const author = post?.author;
 
+  const modalNode = isReplyOpen && typeof document !== 'undefined'
+    ? createPortal(
+      <div className={styles.modalOverlay}>
+        <div className={styles.modal}>
+          <div className={styles.modalHeader}>
+            <h3>发布回复</h3>
+          </div>
+          <div className={styles.modalBody}>
+            <div className={styles.replyEditor}>
+              <MarkdownEditor
+                value={replyDraft}
+                style={{ height: '280px' }}
+                onChange={({ text }) => setReplyDraft(text)}
+                renderHTML={(text) => (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkIns]}
+                    rehypePlugins={[rehypeHighlight]}
+                  >
+                    {text}
+                  </ReactMarkdown>
+                )}
+                config={replyEditorConfig}
+                placeholder="使用 Markdown 编写回复内容..."
+              />
+            </div>
+          </div>
+          <div className={styles.modalFooter}>
+            <button className={styles.ghostButton} onClick={() => setIsReplyOpen(false)}>
+              取消
+            </button>
+            <button className={styles.primaryButton} onClick={handleSubmitReply}>
+              发送回复
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )
+    : null;
+
   return (
-    <div className={styles.detail}>
+    <div className={styles.postDetail}>
       <button onClick={handleBack} className={styles.backButton}>
         ← 返回
       </button>
@@ -108,28 +238,114 @@ const PostDetail = () => {
             )}
           </div>
 
-          <div className={styles.postContent}>
+          <div className={`${styles.postContent} markdown-body`}>
             <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                h1: (props) => <h1 className={styles.markdownH1} {...props} />,
-                h2: (props) => <h2 className={styles.markdownH2} {...props} />,
-                h3: (props) => <h3 className={styles.markdownH3} {...props} />,
-                p: (props) => <p className={styles.markdownParagraph} {...props} />,
-                code: (props) => <code className={styles.inlineCode} {...props} />,
-                img: ({ src, alt }) => (
-                  <img src={src} alt={alt} className={styles.markdownImage} loading="lazy" />
-                ),
-                blockquote: (props) => (
-                  <blockquote className={styles.blockquote} {...props} />
-                ),
-                ul: (props) => <ul className={styles.markdownList} {...props} />,
-                ol: (props) => <ol className={styles.markdownList} {...props} />,
-                a: (props) => <a className={styles.markdownLink} {...props} />,
-              }}
+              remarkPlugins={[remarkGfm, remarkIns]}
+              rehypePlugins={[rehypeHighlight]}
             >
               {post.content || post.summary}
             </ReactMarkdown>
+          </div>
+
+          <div className={styles.actionBar}>
+            <button className={styles.actionButton} onClick={() => setIsReplyOpen(true)}>
+              💬 回复
+            </button>
+            <button className={`${styles.actionButton} ${styles.dangerButton}`} onClick={handleDeletePost}>
+              🗑 删除帖子
+            </button>
+          </div>
+
+          <div className={styles.replySection}>
+            <h3 className={styles.replyTitle}>回复</h3>
+            {replies.length === 0 ? (
+              <div className={styles.emptyReply}>还没有人回复，来抢沙发吧～</div>
+            ) : (
+              <div className={styles.replyList}>
+                {[...replies]
+                  .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                  .map((reply) => (
+                    <div key={reply.id} className={styles.replyItem}>
+                      <div
+                        className={styles.replyAvatar}
+                        style={reply.author.avatar ? { backgroundImage: `url(${reply.author.avatar})` } : undefined}
+                      />
+                      <div className={styles.replyBody}>
+                        <div className={styles.replyHeader}>
+                          <span className={styles.replyName}>{reply.author.name}</span>
+                          <span className={styles.replyTime}>
+                            {new Date(reply.createdAt).toLocaleString('zh-CN')}
+                          </span>
+                        </div>
+                        {reply.parentId && (
+                          <div className={styles.replyTo}>回复 @ {reply.replyToName}</div>
+                        )}
+                        <div className={styles.replyContent}>
+                          <div className={`${styles.replyMarkdown} markdown-body markdown-reply`}>
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm, remarkIns]}
+                              rehypePlugins={[rehypeHighlight]}
+                            >
+                              {reply.content}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
+
+                        <div className={styles.replyFooter}>
+                          <button
+                            className={styles.replyButton}
+                            onClick={() => handleOpenNestedReply(reply.id)}
+                          >
+                            回复
+                          </button>
+                          <button
+                            className={styles.replyDeleteButton}
+                            onClick={() => handleDeleteReply(reply.id)}
+                          >
+                            删除
+                          </button>
+                        </div>
+
+                        {activeReplyId === reply.id && (
+                          <div className={styles.replyBox}>
+                            <div className={styles.replyEditor}>
+                              <MarkdownEditor
+                                value={nestedDraft}
+                                style={{ height: '220px' }}
+                                onChange={({ text }) => setNestedDraft(text)}
+                                renderHTML={(text) => (
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm, remarkIns]}
+                                    rehypePlugins={[rehypeHighlight]}
+                                  >
+                                    {text}
+                                  </ReactMarkdown>
+                                )}
+                                config={replyEditorConfig}
+                                placeholder={`回复 @${reply.author.name} ...`}
+                              />
+                            </div>
+                            <div className={styles.replyBoxActions}>
+                              <button
+                                className={styles.ghostButton}
+                                onClick={() => setActiveReplyId(null)}
+                              >
+                                取消
+                              </button>
+                              <button
+                                className={styles.primaryButton}
+                                onClick={() => handleSubmitNestedReply(reply.id)}
+                              >
+                                发送回复
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -145,6 +361,8 @@ const PostDetail = () => {
           </Link>
         </div>
       )}
+
+      {modalNode}
     </div>
   );
 };

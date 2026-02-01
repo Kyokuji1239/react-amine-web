@@ -4,11 +4,13 @@ import { useForm } from 'react-hook-form';
 import MarkdownEditor from 'react-markdown-editor-lite';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkIns from 'remark-ins';
+import rehypeHighlight from 'rehype-highlight';
 import 'react-markdown-editor-lite/lib/index.css';
 import styles from './PostEditor.module.css';
 import { getAllCategories, loadPostContent } from '../../utils/postLoader';
-import { getCategoryColor, getCategoryTextColor } from '../../config';
-import { useUser, isProfileComplete } from '../../context/UserContext';
+import { getCategoryTextColor } from '../../config';
+import { useUser } from '../../context/UserContext';
 
 const PostEditor = ({ isEditMode = false, initialData = null }) => {
   const navigate = useNavigate();
@@ -289,8 +291,8 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
       fullScreen: true,
       hideMenu: true
     },
-    htmlClass: styles.markdownPreview,
-    markdownClass: styles.markdownEditor,
+    htmlClass: 'markdown-body markdown-preview',
+    markdownClass: 'markdown-editor',
     syncScrollMode: ['leftFollowRight', 'rightFollowLeft'],
     imageAccept: '.jpg,.jpeg,.png,.gif,.webp',
     linkAccept: '.*'
@@ -503,7 +505,10 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
               style={{ height: '500px' }}
               onChange={({ text }) => setValue('content', text)}
               renderHTML={(text) => (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkIns]}
+                  rehypePlugins={[rehypeHighlight]}
+                >
                   {text}
                 </ReactMarkdown>
               )}

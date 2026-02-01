@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client'
 //引入hashrouter，后面需要更改为browserRouter
 import { HashRouter } from 'react-router-dom'
 import './index.css'
+import './pages/config/markdown.css'
 import App from './App.jsx'
 import { UserProvider } from './pages/context/UserContext'
 
