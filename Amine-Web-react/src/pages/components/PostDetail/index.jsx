@@ -8,7 +8,7 @@ import rehypeHighlight from 'rehype-highlight';
 import MarkdownEditor from 'react-markdown-editor-lite';
 import 'react-markdown-editor-lite/lib/index.css';
 import styles from './PostDetail.module.css';
-import { loadPostContent } from '../../utils/postLoader';
+import { loadPostContent, markPostDeleted } from '../../utils/postLoader';
 import { getCategoryColor } from '../../config';
 import { useUser } from '../../context/UserContext';
 
@@ -23,6 +23,39 @@ const PostDetail = () => {
   const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [replyDraft, setReplyDraft] = useState('');
   const [replies, setReplies] = useState([]);
+  const LOCAL_REPLIES_KEY = 'aw_local_replies';
+
+  const readLocalReplies = () => {
+    try {
+      const raw = localStorage.getItem(LOCAL_REPLIES_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+      console.error('Error reading local replies:', error);
+      return {};
+    }
+  };
+
+  const writeLocalReplies = (data) => {
+    try {
+      localStorage.setItem(LOCAL_REPLIES_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error('Error writing local replies:', error);
+    }
+  };
+
+  const loadRepliesFromCache = (postId) => {
+    const data = readLocalReplies();
+    const list = Array.isArray(data[postId]) ? data[postId] : [];
+    setReplies(list);
+  };
+
+  const persistReplies = (postId, nextReplies) => {
+    const data = readLocalReplies();
+    data[postId] = nextReplies;
+    writeLocalReplies(data);
+  };
   const [activeReplyId, setActiveReplyId] = useState(null);
   const [nestedDraft, setNestedDraft] = useState('');
 
@@ -73,6 +106,12 @@ const PostDetail = () => {
     fetchPost();
   }, [id]);
 
+  useEffect(() => {
+    if (id) {
+      loadRepliesFromCache(id);
+    }
+  }, [id]);
+
   const handleSubmitReply = () => {
     if (!replyDraft.trim()) return;
     const newReply = {
@@ -83,7 +122,11 @@ const PostDetail = () => {
       parentId: null,
       replyToName: null,
     };
-    setReplies((prev) => [...prev, newReply]);
+    setReplies((prev) => {
+      const next = [...prev, newReply];
+      persistReplies(id, next);
+      return next;
+    });
     setReplyDraft('');
     setIsReplyOpen(false);
   };
@@ -104,20 +147,40 @@ const PostDetail = () => {
       parentId: replyId,
       replyToName: target?.author?.name || '用户',
     };
-    setReplies((prev) => [...prev, newReply]);
+    setReplies((prev) => {
+      const next = [...prev, newReply];
+      persistReplies(id, next);
+      return next;
+    });
     setNestedDraft('');
     setActiveReplyId(null);
   };
 
   const handleDeletePost = () => {
+    const canDeletePost = currentUser.isAdmin || (post?.author?.id && currentUser.id === post.author.id);
+    if (!canDeletePost) {
+      window.alert('你没有权限删除该帖子。');
+      return;
+    }
     if (!window.confirm('确定删除该帖子吗？此操作不可恢复。')) return;
+    markPostDeleted(id);
     setPost(null);
     navigate(getBackPath());
   };
 
   const handleDeleteReply = (replyId) => {
+    const target = replies.find((reply) => reply.id === replyId);
+    const canDeleteReply = currentUser.isAdmin || (target?.author?.id && currentUser.id === target.author.id);
+    if (!canDeleteReply) {
+      window.alert('你没有权限删除该回复。');
+      return;
+    }
     if (!window.confirm('确定删除该回复吗？')) return;
-    setReplies((prev) => prev.filter((reply) => reply.id !== replyId && reply.parentId !== replyId));
+    setReplies((prev) => {
+      const next = prev.filter((reply) => reply.id !== replyId && reply.parentId !== replyId);
+      persistReplies(id, next);
+      return next;
+    });
     if (activeReplyId === replyId) {
       setActiveReplyId(null);
     }
@@ -170,6 +233,7 @@ const PostDetail = () => {
     : { name: author || '匿名' };
   const hasAuthorLink = !!authorInfo.id;
   const isAuthorAdmin = authorInfo.isAdmin === true;
+  const canDeletePost = currentUser.isAdmin || (authorInfo.id && currentUser.id === authorInfo.id);
 
   const modalNode = isReplyOpen && typeof document !== 'undefined'
     ? createPortal(
@@ -236,7 +300,6 @@ const PostDetail = () => {
                   state={{ author: authorInfo }}
                   className={styles.authorLink}
                 >
-                  <span>👤</span>
                   <div
                     className={styles.authorAvatar}
                     style={authorInfo.avatar ? { backgroundImage: `url(${authorInfo.avatar})` } : undefined}
@@ -246,7 +309,7 @@ const PostDetail = () => {
                 </Link>
               ) : (
                 <span className={styles.author}>
-                  👤 {authorInfo.name || '匿名'}
+                  {authorInfo.name || '匿名'}
                   {isAuthorAdmin && <span className={styles.adminBadge}>管理员</span>}
                 </span>
               )}
@@ -279,9 +342,11 @@ const PostDetail = () => {
             <button className={styles.actionButton} onClick={() => setIsReplyOpen(true)}>
               💬 回复
             </button>
-            <button className={`${styles.actionButton} ${styles.dangerButton}`} onClick={handleDeletePost}>
-              🗑 删除帖子
-            </button>
+            {canDeletePost && (
+              <button className={`${styles.actionButton} ${styles.dangerButton}`} onClick={handleDeletePost}>
+                🗑 删除帖子
+              </button>
+            )}
           </div>
 
           <div className={styles.replySection}>
@@ -350,12 +415,14 @@ const PostDetail = () => {
                           >
                             回复
                           </button>
-                          <button
-                            className={styles.replyDeleteButton}
-                            onClick={() => handleDeleteReply(reply.id)}
-                          >
-                            删除
-                          </button>
+                          {(currentUser.isAdmin || (reply.author?.id && currentUser.id === reply.author.id)) && (
+                            <button
+                              className={styles.replyDeleteButton}
+                              onClick={() => handleDeleteReply(reply.id)}
+                            >
+                              删除
+                            </button>
+                          )}
                         </div>
 
                         {activeReplyId === reply.id && (

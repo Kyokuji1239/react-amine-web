@@ -70,7 +70,6 @@ const Post = ({ post, preview = false, onReadMore, isPinned = false, currentCate
               state={{ author: authorInfo }}
               className={styles.authorLink}
             >
-              <span>👤</span>
               <div
                 className={styles.authorAvatar}
                 style={authorInfo.avatar ? { backgroundImage: `url(${authorInfo.avatar})` } : undefined}
@@ -80,7 +79,7 @@ const Post = ({ post, preview = false, onReadMore, isPinned = false, currentCate
             </Link>
           ) : (
             <span className={styles.author}>
-              👤 {authorInfo.name || '匿名'}
+              {authorInfo.name || '匿名'}
               {isAuthorAdmin && <span className={styles.adminBadge}>管理员</span>}
             </span>
           )}

@@ -8,7 +8,7 @@ import remarkIns from 'remark-ins';
 import rehypeHighlight from 'rehype-highlight';
 import 'react-markdown-editor-lite/lib/index.css';
 import styles from './PostEditor.module.css';
-import { getAllCategories, loadPostContent } from '../../utils/postLoader';
+import { getAllCategories, loadPostContent, upsertLocalPost } from '../../utils/postLoader';
 import { getCategoryTextColor } from '../../config';
 import { useUser } from '../../context/UserContext';
 
@@ -191,16 +191,15 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
   // 保存函数（不包含状态管理）
   const savePostData = useCallback(async (postData, status) => {
     try {
-      // TODO: 调用API保存数据
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 本地缓存保存
+      upsertLocalPost({ ...postData, status });
 
       // 根据状态显示不同的通知
       console.log('保存完成，显示通知，状态:', status);
       if (status === 'draft') {
-        logMessage('草稿已保存到服务器', 'info');
+        logMessage('草稿已保存到本地缓存', 'info');
       } else {
-        logMessage('帖子已成功发布', 'info');
+        logMessage('帖子已成功发布（本地缓存）', 'info');
       }
 
       setHasUnsavedChanges(false);

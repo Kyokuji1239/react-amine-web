@@ -52,12 +52,107 @@ const normalizeAuthor = (author) => {
   };
 };
 
+const LOCAL_POSTS_KEY = 'aw_local_posts';
+const LOCAL_DELETED_POSTS_KEY = 'aw_deleted_posts';
+
+const readLocalPosts = () => {
+  try {
+    const raw = localStorage.getItem(LOCAL_POSTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Error reading local posts:', error);
+    return [];
+  }
+};
+
+const writeLocalPosts = (posts) => {
+  try {
+    localStorage.setItem(LOCAL_POSTS_KEY, JSON.stringify(posts));
+  } catch (error) {
+    console.error('Error writing local posts:', error);
+  }
+};
+
+const readDeletedPosts = () => {
+  try {
+    const raw = localStorage.getItem(LOCAL_DELETED_POSTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Error reading deleted posts:', error);
+    return [];
+  }
+};
+
+const writeDeletedPosts = (ids) => {
+  try {
+    localStorage.setItem(LOCAL_DELETED_POSTS_KEY, JSON.stringify(ids));
+  } catch (error) {
+    console.error('Error writing deleted posts:', error);
+  }
+};
+
+const isPostDeleted = (postId) => {
+  const ids = readDeletedPosts();
+  return ids.includes(postId);
+};
+
+export const markPostDeleted = (postId) => {
+  const ids = readDeletedPosts();
+  if (!ids.includes(postId)) {
+    ids.push(postId);
+    writeDeletedPosts(ids);
+  }
+  const posts = readLocalPosts();
+  const nextPosts = posts.filter((item) => item.id !== postId);
+  writeLocalPosts(nextPosts);
+};
+
+export const upsertLocalPost = (postData) => {
+  const normalized = {
+    ...postData,
+    author: normalizeAuthor(postData.author),
+  };
+  const posts = readLocalPosts();
+  const index = posts.findIndex((item) => item.id === normalized.id);
+  if (index >= 0) {
+    posts[index] = { ...posts[index], ...normalized };
+  } else {
+    posts.unshift(normalized);
+  }
+  writeLocalPosts(posts);
+  return normalized;
+};
+
+const getLocalPostById = (postId) => {
+  const posts = readLocalPosts();
+  return posts.find((item) => item.id === postId) || null;
+};
+
+const getLocalPublishedPosts = () => {
+  const posts = readLocalPosts();
+  return posts.filter((item) => item.status === 'published');
+};
+
 /**
  * 加载单个帖子的详细内容
  * @param {string} postId - 帖子ID
  */
 export const loadPostContent = async (postId) => {
   try {
+    if (isPostDeleted(postId)) {
+      return null;
+    }
+    const localPost = getLocalPostById(postId);
+    if (localPost) {
+      return {
+        ...localPost,
+        author: normalizeAuthor(localPost.author),
+      };
+    }
     // 使用fetch加载markdown文件
     const mdResponse = await fetch(`/posts/${postId}.md`);
     const mdContent = mdResponse.ok ? await mdResponse.text() : '';
@@ -108,8 +203,32 @@ export const loadAllPosts = async () => {
 
     const loadedPosts = await Promise.all(postPromises);
 
+    const localPosts = getLocalPublishedPosts();
+    const merged = new Map();
+
+    localPosts.forEach((post) => {
+      merged.set(post.id, {
+        ...post,
+        author: normalizeAuthor(post.author),
+        isPinnedGlobally: false,
+        pinnedInCategories: [],
+        order: post.order || 999,
+      });
+    });
+
+    loadedPosts.forEach((post) => {
+      if (post) {
+        if (!merged.has(post.id)) {
+          merged.set(post.id, post);
+        }
+      }
+    });
+
+    const combinedPosts = Array.from(merged.values());
+
     // 过滤掉加载失败的帖子
-    const validPosts = loadedPosts.filter(post => post !== null);
+    const deletedIds = readDeletedPosts();
+    const validPosts = combinedPosts.filter(post => post !== null && !deletedIds.includes(post.id));
 
     // 排序：先按置顶，再按order权重，最后按日期
     return validPosts.sort((a, b) => {
