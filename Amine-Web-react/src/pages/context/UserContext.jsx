@@ -38,21 +38,31 @@ export function UserProvider({ children }) {
     }, [user]);
 
     const login = async () => {
-        setUser({ id: 'local', loggedIn: true, profile: { ...defaultProfile } });
+        setUser({ id: 'local', loggedIn: true, isAdmin: false, profile: { ...defaultProfile } });
     };
 
     const updateProfile = (profile) => {
         setUser((prev) => ({
             id: prev?.id || 'local',
             loggedIn: true,
+            isAdmin: prev?.isAdmin === true,
             profile: { ...defaultProfile, ...profile },
+        }));
+    };
+
+    const setAdmin = (isAdmin) => {
+        setUser((prev) => ({
+            id: prev?.id || 'local',
+            loggedIn: true,
+            isAdmin: !!isAdmin,
+            profile: { ...defaultProfile, ...(prev?.profile || {}) },
         }));
     };
 
     const logout = () => setUser(null);
 
     return (
-        <UserContext.Provider value={{ user, login, logout, updateProfile }}>
+        <UserContext.Provider value={{ user, login, logout, updateProfile, setAdmin }}>
             {children}
         </UserContext.Provider>
     );
