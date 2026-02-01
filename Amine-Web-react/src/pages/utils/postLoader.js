@@ -24,6 +24,7 @@ const defaultAuthor = {
   school: '',
   className: '',
   email: '',
+  isAdmin: false,
 };
 
 const normalizeAuthor = (author) => {
@@ -47,6 +48,7 @@ const normalizeAuthor = (author) => {
     school: author.school || '',
     className: author.className || '',
     email: author.email || '',
+    isAdmin: author.isAdmin === true,
   };
 };
 

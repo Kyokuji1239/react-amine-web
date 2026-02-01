@@ -163,6 +163,7 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
       school: user?.profile?.school || '',
       className: user?.profile?.className || '',
       email: user?.profile?.email || '',
+      isAdmin: user?.isAdmin === true,
     };
 
     const postData = {

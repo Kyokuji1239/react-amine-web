@@ -54,6 +54,62 @@
     gap: 12px;
 }
 
+.adminSection {
+    display: grid;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px dashed rgba(255, 133, 161, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.adminToggle {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--text-main);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.adminPanel {
+    display: grid;
+    gap: 8px;
+}
+
+.adminStatus {
+    color: var(--text-sub);
+    font-size: 0.9rem;
+}
+
+.adminInputRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.adminInputRow input {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.adminApply {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.adminError {
+    color: #e11d48;
+    font-size: 0.85rem;
+}
+
 .save,
 .logout {
     padding: 8px 12px;
@@ -81,22 +137,24 @@
     color: black;
 }
 
-.form input {color: #333;}
+.form input {
+    color: #333;
+}
 
 .label input:-webkit-autofill,
-.label input:-webkit-autofill:hover, 
+.label input:-webkit-autofill:hover,
 .label input:-webkit-autofill:focus,
 .label input:-webkit-autofill:active {
     /* 覆盖黄色/灰色背景 */
     -webkit-box-shadow: 0 0 0px 1000px white inset !important;
     box-shadow: 0 0 0px 1000px white inset !important;
-    
+
     /* 设置文字颜色 */
     -webkit-text-fill-color: #333 !important;
-    
+
     /* 设置背景颜色 */
     background-color: white !important;
-    
+
     /* 过渡动画 */
     transition: background-color 5000s ease-in-out 0s;
 }

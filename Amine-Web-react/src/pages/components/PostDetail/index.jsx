@@ -33,6 +33,7 @@ const PostDetail = () => {
     school: user?.profile?.school || '',
     className: user?.profile?.className || '',
     email: user?.profile?.email || '',
+    isAdmin: user?.isAdmin === true,
   };
 
   const createId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -168,6 +169,7 @@ const PostDetail = () => {
     ? author
     : { name: author || '匿名' };
   const hasAuthorLink = !!authorInfo.id;
+  const isAuthorAdmin = authorInfo.isAdmin === true;
 
   const modalNode = isReplyOpen && typeof document !== 'undefined'
     ? createPortal(
@@ -240,9 +242,13 @@ const PostDetail = () => {
                     style={authorInfo.avatar ? { backgroundImage: `url(${authorInfo.avatar})` } : undefined}
                   />
                   <span className={styles.authorName}>{authorInfo.name || '匿名'}</span>
+                  {isAuthorAdmin && <span className={styles.adminBadge}>管理员</span>}
                 </Link>
               ) : (
-                <span className={styles.author}>👤 {authorInfo.name || '匿名'}</span>
+                <span className={styles.author}>
+                  👤 {authorInfo.name || '匿名'}
+                  {isAuthorAdmin && <span className={styles.adminBadge}>管理员</span>}
+                </span>
               )}
               {post.readTime && (
                 <span className={styles.readTime}>⏱️ {post.readTime}</span>
@@ -302,6 +308,9 @@ const PostDetail = () => {
                                   style={reply.author.avatar ? { backgroundImage: `url(${reply.author.avatar})` } : undefined}
                                 />
                                 <span className={styles.replyName}>{reply.author.name}</span>
+                                {reply.author?.isAdmin && (
+                                  <span className={styles.adminBadge}>管理员</span>
+                                )}
                               </Link>
                             ) : (
                               <>
@@ -310,6 +319,9 @@ const PostDetail = () => {
                                   style={reply.author.avatar ? { backgroundImage: `url(${reply.author.avatar})` } : undefined}
                                 />
                                 <span className={styles.replyName}>{reply.author.name}</span>
+                                {reply.author?.isAdmin && (
+                                  <span className={styles.adminBadge}>管理员</span>
+                                )}
                               </>
                             )}
                           </div>

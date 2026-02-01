@@ -46,6 +46,7 @@ const Post = ({ post, preview = false, onReadMore, isPinned = false, currentCate
     ? post.author
     : { name: post.author || '匿名' };
   const hasAuthorLink = !!authorInfo.id;
+  const isAuthorAdmin = authorInfo.isAdmin === true;
 
   return (
     <article className={`${styles.post} ${preview ? styles.preview : ''} ${isPinned ? styles.pinned : ''}`}>
@@ -75,9 +76,13 @@ const Post = ({ post, preview = false, onReadMore, isPinned = false, currentCate
                 style={authorInfo.avatar ? { backgroundImage: `url(${authorInfo.avatar})` } : undefined}
               />
               <span className={styles.authorName}>{authorInfo.name || '匿名'}</span>
+              {isAuthorAdmin && <span className={styles.adminBadge}>管理员</span>}
             </Link>
           ) : (
-            <span className={styles.author}>👤 {authorInfo.name || '匿名'}</span>
+            <span className={styles.author}>
+              👤 {authorInfo.name || '匿名'}
+              {isAuthorAdmin && <span className={styles.adminBadge}>管理员</span>}
+            </span>
           )}
           {post.readTime && (
             <span className={styles.readTime}>⏱️ {post.readTime}</span>

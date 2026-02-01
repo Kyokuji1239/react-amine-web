@@ -12,7 +12,7 @@ const emptyProfile = {
 };
 
 export default function Profile() {
-    const { user, login, updateProfile, logout } = useUser();
+    const { user, login, updateProfile, logout, setAdmin } = useUser();
     const navigate = useNavigate();
 
     const isLoggedIn = user?.loggedIn === true;
@@ -23,9 +23,13 @@ export default function Profile() {
     }, [isLoggedIn, login]);
 
     const [form, setForm] = useState(() => ({
-    ...emptyProfile,
-    ...(user?.profile || {})
+        ...emptyProfile,
+        ...(user?.profile || {})
     }));
+    const [adminOpen, setAdminOpen] = useState(false);
+    const [adminKey, setAdminKey] = useState('');
+    const [adminError, setAdminError] = useState('');
+    const isAdmin = user?.isAdmin === true;
 
     const handleChange = (e) => {
         setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
@@ -61,6 +65,16 @@ export default function Profile() {
         navigate('/'); // 回主界面
     };
 
+    const handleAdminKey = () => {
+        if (adminKey.trim() === 'E动漫社forever') {
+            setAdmin(true);
+            setAdminError('');
+            setAdminKey('');
+        } else {
+            setAdminError('无效的密钥');
+        }
+    };
+
     const handleLogout = () => {
         logout();
         navigate('/'); // 回主界面
@@ -94,6 +108,40 @@ export default function Profile() {
                     邮箱
                     <input name="email" value={form.email} onChange={handleChange} />
                 </label>
+
+                <div className={styles.adminSection}>
+                    <button
+                        type="button"
+                        className={styles.adminToggle}
+                        onClick={() => setAdminOpen((prev) => !prev)}
+                    >
+                        管理员密钥 {adminOpen ? '▲' : '▼'}
+                    </button>
+                    {adminOpen && (
+                        <div className={styles.adminPanel}>
+                            <div className={styles.adminStatus}>
+                                当前身份：{isAdmin ? '管理员' : '普通用户'}
+                            </div>
+                            <div className={styles.adminInputRow}>
+                                <input
+                                    value={adminKey}
+                                    onChange={(e) => setAdminKey(e.target.value)}
+                                    placeholder="输入密钥"
+                                />
+                                <button
+                                    type="button"
+                                    className={styles.adminApply}
+                                    onClick={handleAdminKey}
+                                >
+                                    验证
+                                </button>
+                            </div>
+                            {adminError && (
+                                <div className={styles.adminError}>{adminError}</div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 <div className={styles.actions}>
                     <button className={styles.save} type="submit">保存</button>
