@@ -1,13 +1,25 @@
 import React from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './PublicProfile.module.css';
+import { useUser } from '../context/UserContext';
 
 export default function PublicProfile() {
     const { state } = useLocation();
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useUser();
 
-    const author = state?.author;
+    const authorFromState = state?.author;
+    const authorFromUser = user?.id === id ? {
+        id: user.id,
+        name: user.profile?.name || '匿名',
+        avatar: user.profile?.avatar || '',
+        school: user.profile?.school || '',
+        className: user.profile?.className || '',
+        email: user.profile?.email || '',
+    } : null;
+
+    const author = authorFromState || authorFromUser;
 
     if (!author) {
         return (

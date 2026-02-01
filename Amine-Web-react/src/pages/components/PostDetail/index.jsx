@@ -30,6 +30,9 @@ const PostDetail = () => {
     id: user?.id || 'guest',
     name: user?.profile?.name || '游客',
     avatar: user?.profile?.avatar || '',
+    school: user?.profile?.school || '',
+    className: user?.profile?.className || '',
+    email: user?.profile?.email || '',
   };
 
   const createId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -161,6 +164,10 @@ const PostDetail = () => {
   }
 
   const author = post?.author;
+  const authorInfo = typeof author === 'object' && author !== null
+    ? author
+    : { name: author || '匿名' };
+  const hasAuthorLink = !!authorInfo.id;
 
   const modalNode = isReplyOpen && typeof document !== 'undefined'
     ? createPortal(
@@ -221,7 +228,22 @@ const PostDetail = () => {
               <span className={styles.date}>
                 📅 {new Date(post.date).toLocaleDateString('zh-CN')}
               </span>
-              <span className={styles.author}>👤 {post.author}</span>
+              {hasAuthorLink ? (
+                <Link
+                  to={`/user/${authorInfo.id}`}
+                  state={{ author: authorInfo }}
+                  className={styles.authorLink}
+                >
+                  <span>👤</span>
+                  <div
+                    className={styles.authorAvatar}
+                    style={authorInfo.avatar ? { backgroundImage: `url(${authorInfo.avatar})` } : undefined}
+                  />
+                  <span className={styles.authorName}>{authorInfo.name || '匿名'}</span>
+                </Link>
+              ) : (
+                <span className={styles.author}>👤 {authorInfo.name || '匿名'}</span>
+              )}
               {post.readTime && (
                 <span className={styles.readTime}>⏱️ {post.readTime}</span>
               )}
@@ -266,13 +288,31 @@ const PostDetail = () => {
                   .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
                   .map((reply) => (
                     <div key={reply.id} className={styles.replyItem}>
-                      <div
-                        className={styles.replyAvatar}
-                        style={reply.author.avatar ? { backgroundImage: `url(${reply.author.avatar})` } : undefined}
-                      />
                       <div className={styles.replyBody}>
                         <div className={styles.replyHeader}>
-                          <span className={styles.replyName}>{reply.author.name}</span>
+                          <div className={styles.replyAuthor}>
+                            {reply.author?.id ? (
+                              <Link
+                                to={`/user/${reply.author.id}`}
+                                state={{ author: reply.author }}
+                                className={styles.replyAuthorLink}
+                              >
+                                <div
+                                  className={styles.replyAvatar}
+                                  style={reply.author.avatar ? { backgroundImage: `url(${reply.author.avatar})` } : undefined}
+                                />
+                                <span className={styles.replyName}>{reply.author.name}</span>
+                              </Link>
+                            ) : (
+                              <>
+                                <div
+                                  className={styles.replyAvatar}
+                                  style={reply.author.avatar ? { backgroundImage: `url(${reply.author.avatar})` } : undefined}
+                                />
+                                <span className={styles.replyName}>{reply.author.name}</span>
+                              </>
+                            )}
+                          </div>
                           <span className={styles.replyTime}>
                             {new Date(reply.createdAt).toLocaleString('zh-CN')}
                           </span>
@@ -350,14 +390,14 @@ const PostDetail = () => {
         </>
       )}
 
-      {author && (
+      {hasAuthorLink && (
         <div className={styles.author}>
-          <Link to={`/user/${author.id}`} state={{ author }} className={styles.authorLink}>
+          <Link to={`/user/${authorInfo.id}`} state={{ author: authorInfo }} className={styles.authorLink}>
             <div
               className={styles.authorAvatar}
-              style={author.avatar ? { backgroundImage: `url(${author.avatar})` } : undefined}
+              style={authorInfo.avatar ? { backgroundImage: `url(${authorInfo.avatar})` } : undefined}
             />
-            <span className={styles.authorName}>{author.name}</span>
+            <span className={styles.authorName}>{authorInfo.name || '匿名'}</span>
           </Link>
         </div>
       )}

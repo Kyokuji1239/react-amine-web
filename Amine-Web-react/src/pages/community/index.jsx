@@ -14,6 +14,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 //用户面板组件
 import UserPanel from '../components/UserPanel'
 import Profile from '../profile';
+import PublicProfile from '../profile/PublicProfile';
 
 //帖子编辑器组件
 import PostEditor from '../components/PostEditor';
@@ -80,7 +81,7 @@ export default function CommunityBoard() {
       top: 0,
       left: 0,
       behavior: 'smooth'
-    }); 
+    });
   }, [location.key]);
 
   return (
@@ -153,6 +154,7 @@ export default function CommunityBoard() {
             <Route path="/tech" element={<TechContent />} />
             <Route path="/musicgames" element={<MusicGamesContent />} />
             <Route path="/post/:id" element={<PostDetail />} />
+            <Route path="/user/:id" element={<PublicProfile />} />
             <Route path="/editor" element={<PostEditor />} />
             <Route path="/editor/:id" element={<PostEditor isEditMode={true} />} />
             <Route path="/profile" element={<Profile />} />

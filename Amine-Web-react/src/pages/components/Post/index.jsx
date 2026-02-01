@@ -42,6 +42,11 @@ const Post = ({ post, preview = false, onReadMore, isPinned = false, currentCate
     );
   };
 
+  const authorInfo = typeof post.author === 'object' && post.author !== null
+    ? post.author
+    : { name: post.author || '匿名' };
+  const hasAuthorLink = !!authorInfo.id;
+
   return (
     <article className={`${styles.post} ${preview ? styles.preview : ''} ${isPinned ? styles.pinned : ''}`}>
       {/* 置顶标识 */}
@@ -58,7 +63,22 @@ const Post = ({ post, preview = false, onReadMore, isPinned = false, currentCate
           <span className={styles.date}>
             📅 {new Date(post.date).toLocaleDateString('zh-CN')}
           </span>
-          <span className={styles.author}>👤 {post.author}</span>
+          {hasAuthorLink ? (
+            <Link
+              to={`/user/${authorInfo.id}`}
+              state={{ author: authorInfo }}
+              className={styles.authorLink}
+            >
+              <span>👤</span>
+              <div
+                className={styles.authorAvatar}
+                style={authorInfo.avatar ? { backgroundImage: `url(${authorInfo.avatar})` } : undefined}
+              />
+              <span className={styles.authorName}>{authorInfo.name || '匿名'}</span>
+            </Link>
+          ) : (
+            <span className={styles.author}>👤 {authorInfo.name || '匿名'}</span>
+          )}
           {post.readTime && (
             <span className={styles.readTime}>⏱️ {post.readTime}</span>
           )}
