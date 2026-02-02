@@ -14,6 +14,19 @@ const defaultProfile = {
 };
 
 export function UserProvider({ children }) {
+    const getStorageKey = (type, userId) => `aw_${type}_${userId || 'guest'}`;
+
+    const readList = (key) => {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    };
+
     const [user, setUser] = useState(() => {
         const raw = localStorage.getItem('aw_user');
         if (!raw) return null;
@@ -22,22 +35,18 @@ export function UserProvider({ children }) {
     });
 
     const [likes, setLikes] = useState(() => {
-        try {
-            const raw = localStorage.getItem('aw_likes');
-            return raw ? JSON.parse(raw) : [];
-        } catch {
-            return [];
-        }
+        return readList(getStorageKey('likes', 'guest'));
     });
 
     const [favorites, setFavorites] = useState(() => {
-        try {
-            const raw = localStorage.getItem('aw_favorites');
-            return raw ? JSON.parse(raw) : [];
-        } catch {
-            return [];
-        }
+        return readList(getStorageKey('favorites', 'guest'));
     });
+
+    useEffect(() => {
+        const userId = user?.id || 'guest';
+        setLikes(readList(getStorageKey('likes', userId)));
+        setFavorites(readList(getStorageKey('favorites', userId)));
+    }, [user?.id]);
 
     useEffect(() => {
         try {
@@ -57,19 +66,21 @@ export function UserProvider({ children }) {
 
     useEffect(() => {
         try {
-            localStorage.setItem('aw_likes', JSON.stringify(likes));
+            const userId = user?.id || 'guest';
+            localStorage.setItem(getStorageKey('likes', userId), JSON.stringify(likes));
         } catch (e) {
             console.error('Error saving likes:', e);
         }
-    }, [likes]);
+    }, [likes, user?.id]);
 
     useEffect(() => {
         try {
-            localStorage.setItem('aw_favorites', JSON.stringify(favorites));
+            const userId = user?.id || 'guest';
+            localStorage.setItem(getStorageKey('favorites', userId), JSON.stringify(favorites));
         } catch (e) {
             console.error('Error saving favorites:', e);
         }
-    }, [favorites]);
+    }, [favorites, user?.id]);
 
     const login = async () => {
         setUser({ id: 'local', loggedIn: true, isAdmin: false, profile: { ...defaultProfile } });
@@ -96,6 +107,7 @@ export function UserProvider({ children }) {
     const logout = () => setUser(null);
 
     const toggleLike = (postId) => {
+        if (!postId) return;
         setLikes((prev) => {
             if (prev.includes(postId)) {
                 return prev.filter((id) => id !== postId);
@@ -106,6 +118,7 @@ export function UserProvider({ children }) {
     };
 
     const toggleFavorite = (postId) => {
+        if (!postId) return;
         setFavorites((prev) => {
             if (prev.includes(postId)) {
                 return prev.filter((id) => id !== postId);

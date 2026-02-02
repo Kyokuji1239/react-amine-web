@@ -11,19 +11,22 @@ export const Content = ({ onReadMore }) => {
     const [favoritePosts, setFavoritePosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const handleOpenPost = (postId) => {
+        if (onReadMore) {
+            onReadMore(postId);
+            return;
+        }
+        navigate(`/post/${postId}`);
+    };
+
     useEffect(() => {
         const loadFavoritePosts = async () => {
             try {
                 setLoading(true);
-                const posts = [];
-
-                for (const postId of favorites) {
-                    const post = await loadPostContent(postId);
-                    if (post) {
-                        posts.push(post);
-                    }
-                }
-
+                const results = await Promise.all(
+                    favorites.map((postId) => loadPostContent(postId))
+                );
+                const posts = results.filter(Boolean);
                 setFavoritePosts(posts);
             } catch (error) {
                 console.error('Error loading favorite posts:', error);
@@ -47,7 +50,7 @@ export const Content = ({ onReadMore }) => {
         <div className="favorites-container">
             <div className="favorites-header">
                 <h2>🌟 我的收藏夹</h2>
-                <p className="favorites-count">共 {favorites.length} 个收藏</p>
+                <p className="favorites-count">共 {favoritePosts.length} 个收藏</p>
             </div>
 
             {favoritePosts.length === 0 ? (
@@ -62,7 +65,7 @@ export const Content = ({ onReadMore }) => {
             ) : (
                 <div className="favorites-list">
                     {favoritePosts.map((post) => (
-                        <div key={post.id} className="favorite-item" onClick={() => onReadMore?.(post.id)}>
+                        <div key={post.id} className="favorite-item" onClick={() => handleOpenPost(post.id)}>
                             <Post
                                 post={post}
                                 preview={true}

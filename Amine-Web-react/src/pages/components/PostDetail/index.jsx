@@ -16,8 +16,7 @@ const PostDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useUser();
-  const { toggleLike, toggleFavorite, isLiked, isFavorited } = useUser();
+  const { user, toggleLike, toggleFavorite, isLiked, isFavorited } = useUser();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
