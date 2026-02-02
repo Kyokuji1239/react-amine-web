@@ -54,6 +54,7 @@ const normalizeAuthor = (author) => {
 
 const LOCAL_POSTS_KEY = 'aw_local_posts';
 const LOCAL_DELETED_POSTS_KEY = 'aw_deleted_posts';
+const LOCAL_PINNED_POSTS_KEY = 'aw_pinned_posts';
 
 const readLocalPosts = () => {
   try {
@@ -95,6 +96,26 @@ const writeDeletedPosts = (ids) => {
   }
 };
 
+const readPinnedPosts = () => {
+  try {
+    const raw = localStorage.getItem(LOCAL_PINNED_POSTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Error reading pinned posts:', error);
+    return [];
+  }
+};
+
+const writePinnedPosts = (ids) => {
+  try {
+    localStorage.setItem(LOCAL_PINNED_POSTS_KEY, JSON.stringify(ids));
+  } catch (error) {
+    console.error('Error writing pinned posts:', error);
+  }
+};
+
 const isPostDeleted = (postId) => {
   const ids = readDeletedPosts();
   return ids.includes(postId);
@@ -109,6 +130,24 @@ export const markPostDeleted = (postId) => {
   const posts = readLocalPosts();
   const nextPosts = posts.filter((item) => item.id !== postId);
   writeLocalPosts(nextPosts);
+};
+
+export const isPostPinnedLocally = (postId) => {
+  const ids = readPinnedPosts();
+  return ids.includes(postId);
+};
+
+export const setPostPinnedLocally = (postId, isPinned) => {
+  const ids = readPinnedPosts();
+  const exists = ids.includes(postId);
+  if (isPinned && !exists) {
+    ids.push(postId);
+    writePinnedPosts(ids);
+  }
+  if (!isPinned && exists) {
+    const next = ids.filter((id) => id !== postId);
+    writePinnedPosts(next);
+  }
 };
 
 export const upsertLocalPost = (postData) => {
@@ -148,9 +187,12 @@ export const loadPostContent = async (postId) => {
     }
     const localPost = getLocalPostById(postId);
     if (localPost) {
+      const pinnedIds = readPinnedPosts();
       return {
         ...localPost,
         author: normalizeAuthor(localPost.author),
+        isPinnedGlobally: localPost.isPinnedGlobally === true || pinnedIds.includes(postId),
+        pinnedInCategories: localPost.pinnedInCategories || (pinnedIds.includes(postId) ? ['全站'] : []),
       };
     }
     // 使用fetch加载markdown文件
@@ -164,11 +206,18 @@ export const loadPostContent = async (postId) => {
     }
     const postData = await jsonResponse.json();
 
+    const metadataList = await loadPostMetadata();
+    const postMetadata = metadataList.find(m => m.id === postId);
+    const pinnedIds = readPinnedPosts();
+
     return {
       ...postData,
       content: mdContent,
       id: postId,
       author: normalizeAuthor(postData.author),
+      isPinnedGlobally: (postMetadata?.pinnedIn?.length > 0) || pinnedIds.includes(postId),
+      pinnedInCategories: postMetadata?.pinnedIn || (pinnedIds.includes(postId) ? ['全站'] : []),
+      order: postMetadata?.order || postData.order || 999,
     };
   } catch (error) {
     console.error(`Error loading post ${postId}:`, error);
@@ -206,12 +255,14 @@ export const loadAllPosts = async () => {
     const localPosts = getLocalPublishedPosts();
     const merged = new Map();
 
+    const pinnedIds = readPinnedPosts();
+
     localPosts.forEach((post) => {
       merged.set(post.id, {
         ...post,
         author: normalizeAuthor(post.author),
-        isPinnedGlobally: false,
-        pinnedInCategories: [],
+        isPinnedGlobally: post.isPinnedGlobally === true || pinnedIds.includes(post.id),
+        pinnedInCategories: post.pinnedInCategories || (pinnedIds.includes(post.id) ? ['全站'] : []),
         order: post.order || 999,
       });
     });
@@ -219,7 +270,13 @@ export const loadAllPosts = async () => {
     loadedPosts.forEach((post) => {
       if (post) {
         if (!merged.has(post.id)) {
-          merged.set(post.id, post);
+          merged.set(post.id, {
+            ...post,
+            isPinnedGlobally: post.isPinnedGlobally || pinnedIds.includes(post.id),
+            pinnedInCategories: post.pinnedInCategories?.length
+              ? post.pinnedInCategories
+              : (pinnedIds.includes(post.id) ? ['全站'] : []),
+          });
         }
       }
     });
@@ -285,7 +342,7 @@ export const loadPostsByCategory = async (category) => {
     // 为每个帖子添加在当前分类中的置顶状态
     const postsWithPinnedStatus = filteredPosts.map(post => ({
       ...post,
-      isPinnedInCurrentCategory: post.pinnedInCategories.includes(category)
+      isPinnedInCurrentCategory: post.isPinnedGlobally || post.pinnedInCategories.includes(category)
     }));
 
     // 在当前分类内排序：先按当前分类置顶，再按order权重，最后按日期

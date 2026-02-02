@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import MarkdownEditor from 'react-markdown-editor-lite';
@@ -25,9 +25,11 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
   // 添加独立的状态管理
   const [savingDraft, setSavingDraft] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const publishLockRef = useRef(false);
+  const draftLockRef = useRef(false);
 
   // 初始化表单
-  const { register, formState: { errors }, setValue, watch } = useForm({
+  const { register, formState: { errors }, setValue, watch, reset } = useForm({
     defaultValues: initialData || {
       title: '',
       category: '',
@@ -72,17 +74,22 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
         try {
           const postData = await loadPostContent(postId);
           if (postData) {
-            // 设置表单值
-            Object.keys(postData).forEach(key => {
-              if (key in formData) {
-                setValue(key, postData[key]);
-              }
+            reset({
+              title: postData.title || '',
+              category: postData.category || '',
+              summary: postData.summary || '',
+              content: postData.content || postData.summary || '# 请输入内容\n\n从这里开始编辑...',
+              status: postData.status || 'draft',
+              id: postData.id,
+              tags: postData.tags || [],
             });
 
-            // 设置标签
             if (postData.tags) {
               setTags(postData.tags);
+            } else {
+              setTags([]);
             }
+            setHasUnsavedChanges(false);
           }
         } catch (error) {
           console.error('加载帖子失败:', error);
@@ -94,7 +101,7 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
 
       loadPost();
     }
-  }, [isEditMode, postId, setValue, formData, logMessage]);
+  }, [isEditMode, postId, reset, logMessage]);
 
   // 监听表单变化
   useEffect(() => {
@@ -224,10 +231,11 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
   const handleSaveDraft = useCallback(async () => {
     console.log('开始保存草稿');
 
-    // 验证表单
-    if (!validateForm()) {
+    if (draftLockRef.current || savingDraft || publishing) {
       return;
     }
+
+    draftLockRef.current = true;
 
     setSavingDraft(true);
 
@@ -240,29 +248,42 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
       console.error('保存草稿失败:', error);
     } finally {
       setSavingDraft(false);
+      draftLockRef.current = false;
     }
-  }, [validateForm, preparePostData, savePostData]);
+  }, [preparePostData, savePostData, savingDraft, publishing]);
 
   // 发布帖子
   const handlePublishPost = useCallback(async () => {
     console.log('开始发布帖子');
+
+    if (publishLockRef.current || publishing || savingDraft) {
+      return;
+    }
 
     // 验证表单
     if (!validateForm()) {
       return;
     }
 
+    publishLockRef.current = true;
+
     setPublishing(true);
+
+    let didPublish = false;
 
     try {
       const postData = preparePostData('published');
       console.log('准备发布，数据状态:', postData.status);
 
       await savePostData(postData, 'published');
+      didPublish = true;
     } catch (error) {
       console.error('发布失败:', error);
     } finally {
-      setPublishing(false);
+      if (!didPublish) {
+        setPublishing(false);
+        publishLockRef.current = false;
+      }
     }
   }, [validateForm, preparePostData, savePostData]);
 
@@ -372,13 +393,14 @@ const PostEditor = ({ isEditMode = false, initialData = null }) => {
             <select
               className={`${styles.categorySelect} ${errors.category ? styles.error : ''}`}
               {...register('category', { required: '请选择分类' })}
+              value={formData.category || ''}
               style={{
                 borderColor: formData.category ? getCategoryTextColor(formData.category) : '#e0e0e0',
                 color: formData.category ? getCategoryTextColor(formData.category) : 'var(--text-sub)',
                 backgroundColor: 'white'
               }}
               onChange={(e) => {
-                setValue('category', e.target.value);
+                setValue('category', e.target.value, { shouldDirty: true, shouldTouch: true });
               }}
             >
               <option value="" style={{ color: 'var(--text-sub)', backgroundColor: 'white' }}>选择分类</option>

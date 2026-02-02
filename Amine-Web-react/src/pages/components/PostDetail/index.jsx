@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -8,7 +8,7 @@ import rehypeHighlight from 'rehype-highlight';
 import MarkdownEditor from 'react-markdown-editor-lite';
 import 'react-markdown-editor-lite/lib/index.css';
 import styles from './PostDetail.module.css';
-import { loadPostContent, markPostDeleted } from '../../utils/postLoader';
+import { loadPostContent, markPostDeleted, setPostPinnedLocally } from '../../utils/postLoader';
 import { getCategoryColor } from '../../config';
 import { useUser } from '../../context/UserContext';
 
@@ -23,6 +23,9 @@ const PostDetail = () => {
   const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [replyDraft, setReplyDraft] = useState('');
   const [replies, setReplies] = useState([]);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+  const adminMenuRef = useRef(null);
   const LOCAL_REPLIES_KEY = 'aw_local_replies';
 
   const readLocalReplies = () => {
@@ -95,6 +98,7 @@ const PostDetail = () => {
           return;
         }
         setPost(postData);
+        setIsPinned(postData.isPinnedGlobally === true);
         setError(null);
       } catch (err) {
         setError('加载帖子失败，请刷新重试');
@@ -105,6 +109,21 @@ const PostDetail = () => {
     };
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    setIsPinned(post?.isPinnedGlobally === true);
+  }, [post?.isPinnedGlobally]);
+
+  useEffect(() => {
+    if (!adminMenuOpen) return;
+    const handleClickOutside = (event) => {
+      if (adminMenuRef.current && !adminMenuRef.current.contains(event.target)) {
+        setAdminMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [adminMenuOpen]);
 
   useEffect(() => {
     if (id) {
@@ -166,6 +185,30 @@ const PostDetail = () => {
     markPostDeleted(id);
     setPost(null);
     navigate(getBackPath());
+  };
+
+  const handleTogglePinned = () => {
+    if (!currentUser.isAdmin) return;
+    const nextPinned = !isPinned;
+    setPostPinnedLocally(id, nextPinned);
+    setIsPinned(nextPinned);
+    setPost((prev) => {
+      if (!prev) return prev;
+      const nextCategories = nextPinned
+        ? (prev.pinnedInCategories?.length ? prev.pinnedInCategories : ['全站'])
+        : (prev.pinnedInCategories || []).filter((item) => item !== '全站');
+      return {
+        ...prev,
+        isPinnedGlobally: nextPinned,
+        pinnedInCategories: nextCategories,
+      };
+    });
+    setAdminMenuOpen(false);
+  };
+
+  const handleEditPost = () => {
+    if (!currentUser.isAdmin) return;
+    navigate(`/editor/${id}`);
   };
 
   const handleDeleteReply = (replyId) => {
@@ -315,6 +358,36 @@ const PostDetail = () => {
               )}
               {post.readTime && (
                 <span className={styles.readTime}>⏱️ {post.readTime}</span>
+              )}
+              {currentUser.isAdmin && (
+                <div className={styles.adminTools} ref={adminMenuRef}>
+                  <button
+                    type="button"
+                    className={styles.adminToolButton}
+                    onClick={() => setAdminMenuOpen((prev) => !prev)}
+                    aria-label="管理员工具"
+                  >
+                    ⚒️
+                  </button>
+                  {adminMenuOpen && (
+                    <div className={styles.adminMenu}>
+                      <button
+                        type="button"
+                        className={styles.adminMenuItem}
+                        onClick={handleTogglePinned}
+                      >
+                        {isPinned ? '取消置顶' : '置顶帖子'}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.adminMenuItem}
+                        onClick={handleEditPost}
+                      >
+                        编辑帖子
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 

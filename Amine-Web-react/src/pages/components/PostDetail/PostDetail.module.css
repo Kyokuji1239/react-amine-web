@@ -57,6 +57,54 @@
   font-size: 0.95rem;
 }
 
+.adminTools {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.adminToolButton {
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.adminMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+
+.adminMenuItem {
+  border: none;
+  background: rgba(255, 133, 161, 0.1);
+  color: var(--text-main);
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: left;
+}
+
+.adminMenuItem:hover {
+  background: rgba(255, 133, 161, 0.2);
+}
+
 .category {
   display: inline-block;
   background-color: #4CAF50;

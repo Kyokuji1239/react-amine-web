@@ -14,6 +14,7 @@ const PostList = ({ onReadMore, category = null }) => {
   const [error, setError] = useState(null);
   const loaderRef = useRef(null);
   const observerRef = useRef(null);
+  const allPostsRef = useRef([]);
   const postsPerPage = 5;
 
   // 根据分类加载帖子
@@ -28,19 +29,20 @@ const PostList = ({ onReadMore, category = null }) => {
         allPosts = await loadAllPosts();
       }
       
-      // 存储总帖子数
+      // 存储总帖子数 & 缓存所有帖子
+      allPostsRef.current = allPosts;
       setAllPostsCount(allPosts.length);
-      
+
       // 计算当前页的帖子
       const startIndex = 0;
       const endIndex = pageNum * postsPerPage;
       const currentPosts = allPosts.slice(startIndex, endIndex);
-      
+
       setPosts(currentPosts);
       setPage(pageNum);
       setHasMore(currentPosts.length < allPosts.length);
       setError(null);
-      
+
       return allPosts;
     } catch (err) {
       setError('加载帖子失败，请刷新重试');
@@ -59,18 +61,24 @@ const PostList = ({ onReadMore, category = null }) => {
   // 加载更多帖子
   const loadMorePosts = useCallback(async () => {
     if (loading || !hasMore) return;
-    
+
     try {
       setLoading(true);
       const nextPage = page + 1;
-      await loadPosts(nextPage, category);
+      const endIndex = nextPage * postsPerPage;
+      const cachedPosts = allPostsRef.current || [];
+      const nextPosts = cachedPosts.slice(0, endIndex);
+      setPosts(nextPosts);
+      setPage(nextPage);
+      setHasMore(nextPosts.length < cachedPosts.length);
+      setError(null);
     } catch (err) {
       setError('加载更多帖子失败');
       console.error('Error loading more posts:', err);
     } finally {
       setLoading(false);
     }
-  }, [page, loading, hasMore, category, loadPosts]);
+  }, [page, loading, hasMore, postsPerPage]);
 
   // 观察器回调
   const handleObserver = useCallback((entries) => {
@@ -120,10 +128,8 @@ const PostList = ({ onReadMore, category = null }) => {
   const getCategoryBadgeText = useCallback(() => {
     if (category && category !== 'all') {
       return `共 ${posts.length} 篇帖子`;
-    } else {
-      // 主页显示总帖子数
-      return `共 ${allPostsCount} 篇帖子`;
     }
+    return `共 ${allPostsCount} 篇帖子`;
   }, [category, posts.length, allPostsCount]);
 
   // 获取当前分类的颜色
@@ -207,7 +213,8 @@ const PostList = ({ onReadMore, category = null }) => {
       </div>
 
       {/* 加载更多区域 */}
-      <div ref={loaderRef} className={styles.loaderArea}>
+      <div className={styles.loaderArea}>
+        <div ref={loaderRef} className={styles.sentinel} aria-hidden="true" />
         {loading ? (
           <div className={styles.loadingSpinner}>
             <div className={styles.spinner}></div>
@@ -220,14 +227,9 @@ const PostList = ({ onReadMore, category = null }) => {
             <p>没有更多{getCategoryLabel()}了</p>
           </div>
         ) : (
-          <button 
-            onClick={loadMorePosts}
-            className={styles.loadMoreButton}
-            disabled={loading}
-            style={getLoadMoreButtonStyles()}
-          >
-            加载更多{getCategoryLabel()}
-          </button>
+          <div className={styles.loadingHint} style={getLoadMoreButtonStyles()}>
+            继续下滑加载更多{getCategoryLabel()}
+          </div>
         )}
       </div>
     </div>

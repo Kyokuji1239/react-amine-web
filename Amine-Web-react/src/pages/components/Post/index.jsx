@@ -16,8 +16,17 @@ const Post = ({ post, preview = false, onReadMore, isPinned = false, currentCate
 
   // 显示置顶在哪些分类中
   const renderPinnedInfo = () => {
-    if (!isPinned || !post.pinnedInCategories || post.pinnedInCategories.length === 0) {
+    if (!isPinned) {
       return null;
+    }
+
+    if (!post.pinnedInCategories || post.pinnedInCategories.length === 0) {
+      return (
+        <div className={styles.pinnedBadge}>
+          <span className={styles.pinnedIcon}>🔝</span>
+          <span className={styles.pinnedText}>置顶</span>
+        </div>
+      );
     }
 
     // 如果只在当前分类中置顶，显示简单的"置顶"
